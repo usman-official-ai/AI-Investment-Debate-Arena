@@ -48,27 +48,6 @@ st.markdown("""
         font-size: 2rem;
         font-weight: bold;
     }
-    .bull-card {
-        border-left: 4px solid #10b981;
-        padding: 1rem;
-        background-color: #f0fdf4;
-        border-radius: 0.5rem;
-        margin-bottom: 1rem;
-    }
-    .bear-card {
-        border-left: 4px solid #ef4444;
-        padding: 1rem;
-        background-color: #fef2f2;
-        border-radius: 0.5rem;
-        margin-bottom: 1rem;
-    }
-    .judge-card {
-        border-left: 4px solid #8b5cf6;
-        padding: 1rem;
-        background-color: #f5f3ff;
-        border-radius: 0.5rem;
-        margin-bottom: 1rem;
-    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -119,11 +98,9 @@ st.title("🏆 AI Investment Debate Arena")
 st.markdown("#### 🎯 Bull vs Bear - Who will win?")
 
 def run_debate(ticker):
-    """Run the complete debate pipeline"""
     progress_bar = st.progress(0)
     status_text = st.empty()
     
-    # Step 1: Research
     status_text.text("🔍 Researching stock data...")
     progress_bar.progress(20)
     
@@ -134,7 +111,6 @@ def run_debate(ticker):
         st.error(f"Failed to research {ticker}: {research['error']}")
         return None
     
-    # Step 2: Bull Case
     status_text.text("🐂 Building Bull Case...")
     progress_bar.progress(40)
     
@@ -144,7 +120,6 @@ def run_debate(ticker):
         "research": research
     })
     
-    # Step 3: Bear Case
     status_text.text("🐻 Building Bear Case...")
     progress_bar.progress(60)
     
@@ -154,7 +129,6 @@ def run_debate(ticker):
         "research": research
     })
     
-    # Step 4: Judge
     status_text.text("⚖️ Rendering Verdict...")
     progress_bar.progress(80)
     
@@ -209,7 +183,6 @@ if st.session_state.current_debate:
     verdict_text = verdict.get("verdict", "HOLD")
     confidence = verdict.get("confidence", 50)
     
-    # Convert confidence to percentage if it's a decimal
     if isinstance(confidence, float) and confidence < 1:
         confidence = confidence * 100
     
@@ -225,6 +198,7 @@ if st.session_state.current_debate:
     current_price = research.get("raw_stock_data", {}).get("current_price", 0)
     
     col1, col2, col3, col4 = st.columns(4)
+    
     with col1:
         st.metric("Current Price", f"${current_price:.2f}" if current_price else "N/A")
     
@@ -233,14 +207,14 @@ if st.session_state.current_debate:
         if bull_price and isinstance(bull_price, (int, float)):
             st.metric("Bull Target", f"${bull_price:.2f}")
         else:
-            st.metric("Bull Target", "N/A")
+            st.metric("Bull Target", str(bull_price) if bull_price else "N/A")
     
     with col3:
         bear_price = bear.get('price_target', 0)
         if bear_price and isinstance(bear_price, (int, float)):
             st.metric("Bear Target", f"${bear_price:.2f}")
         else:
-            st.metric("Bear Target", "N/A")
+            st.metric("Bear Target", str(bear_price) if bear_price else "N/A")
     
     with col4:
         if price_min and price_max and isinstance(price_min, (int, float)) and isinstance(price_max, (int, float)):
@@ -257,7 +231,7 @@ if st.session_state.current_debate:
         for point in clash_points:
             st.warning(f"⚡ {point}")
     
-    # Three Columns: Bull, Bear, Judge
+    # Three Columns
     col1, col2, col3 = st.columns(3)
     
     with col1:
