@@ -209,9 +209,13 @@ if st.session_state.current_debate:
     verdict_text = verdict.get("verdict", "HOLD")
     confidence = verdict.get("confidence", 50)
     
+    # Convert confidence to percentage if it's a decimal
+    if isinstance(confidence, float) and confidence < 1:
+        confidence = confidence * 100
+    
     st.markdown(f"""
     <div class="verdict-{verdict_text.lower()}">
-        {verdict_text} - {confidence}% Confidence
+        {verdict_text} - {confidence:.0f}% Confidence
     </div>
     """, unsafe_allow_html=True)
     
@@ -223,12 +227,26 @@ if st.session_state.current_debate:
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.metric("Current Price", f"${current_price:.2f}" if current_price else "N/A")
+    
     with col2:
-        st.metric("Bull Target", f"${bull.get('price_target', 0):.2f}" if bull.get('price_target') else "N/A")
+        bull_price = bull.get('price_target', 0)
+        if bull_price and isinstance(bull_price, (int, float)):
+            st.metric("Bull Target", f"${bull_price:.2f}")
+        else:
+            st.metric("Bull Target", "N/A")
+    
     with col3:
-        st.metric("Bear Target", f"${bear.get('price_target', 0):.2f}" if bear.get('price_target') else "N/A")
+        bear_price = bear.get('price_target', 0)
+        if bear_price and isinstance(bear_price, (int, float)):
+            st.metric("Bear Target", f"${bear_price:.2f}")
+        else:
+            st.metric("Bear Target", "N/A")
+    
     with col4:
-        st.metric("Judge's Range", f"${price_min:.2f} - ${price_max:.2f}" if price_min and price_max else "N/A")
+        if price_min and price_max and isinstance(price_min, (int, float)) and isinstance(price_max, (int, float)):
+            st.metric("Judge's Range", f"${price_min:.2f} - ${price_max:.2f}")
+        else:
+            st.metric("Judge's Range", "N/A")
     
     st.markdown("---")
     
@@ -252,7 +270,11 @@ if st.session_state.current_debate:
             st.markdown("**Advantages:**")
             for adv in bull.get('advantages', []):
                 st.markdown(f"💪 {adv}")
-            st.markdown(f"**Price Target:** ${bull.get('price_target', 0):.2f}")
+            bull_price = bull.get('price_target', 0)
+            if bull_price and isinstance(bull_price, (int, float)):
+                st.markdown(f"**Price Target:** ${bull_price:.2f}")
+            else:
+                st.markdown(f"**Price Target:** {bull_price}")
     
     with col2:
         st.markdown("### 🐻 Bear Case")
@@ -264,7 +286,11 @@ if st.session_state.current_debate:
             st.markdown("**Disadvantages:**")
             for dis in bear.get('disadvantages', []):
                 st.markdown(f"📉 {dis}")
-            st.markdown(f"**Price Target:** ${bear.get('price_target', 0):.2f}")
+            bear_price = bear.get('price_target', 0)
+            if bear_price and isinstance(bear_price, (int, float)):
+                st.markdown(f"**Price Target:** ${bear_price:.2f}")
+            else:
+                st.markdown(f"**Price Target:** {bear_price}")
     
     with col3:
         st.markdown("### ⚖️ Judge's Analysis")
@@ -277,7 +303,7 @@ if st.session_state.current_debate:
 st.markdown("---")
 st.markdown("""
 <div style="text-align: center; color: #666; font-size: 0.8rem;">
-    
+    Made with ❤️ by SoftCr8orsOfficial<br>
     Powered by Groq Llama 3 • Data from Yahoo Finance
 </div>
 """, unsafe_allow_html=True)
